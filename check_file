@@ -1,0 +1,12 @@
+---
+- name: Check and remove SHA1 file from sshd_config
+  hosts: all
+  tasks:
+    - name: find the sha1 file on sshd_config
+      command: egrep -i "diffie-hellman-group-exchange-sha1|diffie-hellman-group14-sha1" /etc/siva/sshd_config
+      register: sha1
+      ignore_errors: yes
+    
+    - name: Print file status
+      debug: 
+        msg: "The file exists: {{ sha1.stdout_lines }}"

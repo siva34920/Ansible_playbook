@@ -1,0 +1,13 @@
+---
+- name: For test Facts
+  hosts: all
+  tasks:
+   - name: Get /home mount options 
+     ansible.builtin.set_fact: 
+       home_mount_options: "{{ ansible_facts.mounts | selectattr('mount', '==', '/home') | map(attribute='options') | first }}" 
+     tags: remount
+
+   - name: Debug /home mount options
+     ansible.builtin.debug:
+      msg: "{{ home_mount_options }}"
+

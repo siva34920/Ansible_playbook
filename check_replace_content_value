@@ -1,0 +1,11 @@
+---
+- name: Check and remove SHA1 file from sshd_config
+  hosts: all
+  tasks:
+    - name: check and replace the content in sshd_config
+      lineinfile:
+        state: present
+        dest: /etc/siva/sshd_config
+        regexp: '^USEPAM'
+        line: "USEPAM yes"
+        backup: true
