@@ -1,0 +1,18 @@
+---
+- name: VUl fix to identify SHA1 keytab file and remove the entry
+  hosts: all
+  vars:
+   config: /etc/siva/sshd_config
+  tasks:
+    - name: Ensure {{config}} file exists on server
+      stat:
+       path: "{{config}}" 
+      register: sshd_config_stat
+
+    - name: Remove specific content in {{config}}
+      lineinfile:
+       path: "{{config}}"
+       state: absent
+       regexp: '.*sha1.*'
+       backup: true
+      when: sshd_config_stat.stat.exists

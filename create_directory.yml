@@ -1,0 +1,7 @@
+- name: create the directory Sivabalan on all servers.
+  hosts: all
+  tasks:
+    - name: create a directory
+      file:
+       path: /etc/siva
+       state: directory

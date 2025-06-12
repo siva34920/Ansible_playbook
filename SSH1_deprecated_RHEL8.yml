@@ -1,0 +1,31 @@
+---
+- name: Disable SHA-1 HMAC in cryptographic policy
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: check and comment rsa key in sshd_config file
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: '^HostKey /etc/ssh/ssh_host_rsa_key'
+      line: "#HostKey /etc/ssh/ssh_host_rsa_key"
+      state: present
+      backup: true
+
+  - name: Ensure the NO-SHA1-HMAC policy module exists
+    copy:
+      dest: /etc/crypto-policies/policies/modules/NO-SHA1-HMAC.pmod
+      content: |
+        mac@SSH = -HMAC-SHA1
+
+  - name: Apply the new crypto policy module
+    command: "update-crypto-policies --set DEFAULT:NO-SHA1-HMAC"
+    notify: Restart services
+
+  handlers:
+  - name: Restart services
+    service:
+      name: "{{ item }}"
+      state: restarted
+    with_items:
+      - sshd

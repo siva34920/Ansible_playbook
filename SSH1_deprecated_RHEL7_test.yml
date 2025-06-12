@@ -1,0 +1,48 @@
+---
+  - name: SSA1 deprecated error
+    hosts: all
+    vars:
+     sshd_config: /etc/siva/sshd_config
+    tasks:
+      - name: check and command rsa key in {{ sshd_config }} file
+        lineinfile:
+          dest: "{{ sshd_config }}"
+          regexp: '^HostKey /etc/ssh/ssh_host_rsa_key'
+          line: "#HostKey /etc/ssh/ssh_host_rsa_key"
+          state: present
+          backup: true
+
+      - name: check kexAlgorithm present on {{ sshd_config }} file
+        shell: grep -i kexAlgorithms {{ sshd_config }}
+        register: kexAlgorithm_present
+        ignore_errors: true
+
+      - name: if Not present in {{ sshd_config }} file please add the file
+        lineinfile:
+          dest: "{{ sshd_config }}"
+          line: "kexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,diffie-hellman-group14-sha256"
+          state: present
+        when: kexAlgorithm_present.rc != 0
+        register: kexAlgorithms_add
+  
+      - name: Check the SSA1 file exist on {{ sshd_config }} file
+        shell: grep -E 'diffie-hellman-group-exchange-sha1|diffie-hellman-group14-sha1|diffie-hellman-group1-sha1' {{ sshd_config }}
+        register: SSHA1_check
+        ignore_errors: true
+
+#      - name: Set flag if deprecated SHA1 algorithms are found
+#        set_fact:
+#          SSHA1_found: true
+#        when: SSHA1_check.rc == 0
+
+  
+      - name: Remove SSA1 key algoruthm
+        shell: sed -i -e "s/diffie-hellman-group-exchange-sha1,//g" -e "s/diffie-hellman-group14-sha1,//g" -e "s/diffie-hellman-group1-sha1,//g" {{ sshd_config }}
+        when: SSHA1_check.rc == 0
+        register: SSHA1
+  
+      - name: restart sshd service
+        ansible.builtin.service:
+         name: sshd
+         state: restarted
+        when: SSHA1.changed or kexAlgorithms_add.changed 

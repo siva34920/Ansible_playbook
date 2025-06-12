@@ -1,0 +1,16 @@
+---
+- name: Find world-writable files and set sticky bit
+  hosts: all
+  become: yes
+  tasks:
+    - name: Find world-writable files
+      shell:
+       find / -path /proc -prune -o -path /sys -prune -o \( -type f -o -type d \) -perm /o+w ! -perm /1000 -print 
+      register: world_writable_files
+
+    - name: Set sticky bit on world-writable files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        mode: 'o+t'
+      with_items: "{{ world_writable_files.stdout_lines }}"
+      when: world_writable_files.stdout_lines | length > 0

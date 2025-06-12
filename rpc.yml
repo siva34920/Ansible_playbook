@@ -1,0 +1,36 @@
+---
+- name: Ensure rpcbind is restarted if NFS4 is mounted
+  hosts: all
+  become: yes
+  tasks:
+    - name: Collect the existing mountpoint of the server
+      shell: df -T | grep nfs
+      register: nfs_out
+      ignore_errors: true 
+
+    - name: collect the details under /var/tmp
+      copy:
+        content: "{{ nfs_out.stdout }}"
+        dest: /var/tmp/nfs_details.txt
+      when: nfs_out.stdout
+
+    - name: Check mounted NFS versions
+      command: mount -t nfs4,nfs
+      register: mount_info
+      notify: stop_rpc_related_services
+
+    - name: Debug message if NFS3 is mounted
+      debug:
+        msg: "NFS3 mount detected. No action needed."
+      when: "'vers=3' in mount_info.stdout"
+
+  handlers:
+    - name: stop_rpc_related_services
+      service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: no
+      loop:
+        - rpcbind.socket
+        - rpcbind
+      when: "'vers=3' not in mount_info.stdout"

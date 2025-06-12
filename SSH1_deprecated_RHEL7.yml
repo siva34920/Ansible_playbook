@@ -1,0 +1,28 @@
+---
+- name: SSA1 deprecated error
+  hosts: all
+  vars:
+   sshd_config: /etc/siva/sshd_config
+  tasks:
+    - name: check and command rsa key in {{ sshd_config }} file
+      lineinfile:
+        dest: "{{ sshd_config }}"
+        regexp: '^HostKey /etc/ssh/ssh_host_rsa_key'
+        line: "#HostKey /etc/ssh/ssh_host_rsa_key"
+        state: present
+        backup: true
+
+    - name: Check the SSA1 file exist on {{ sshd_config }} file
+      shell: grep -E 'diffie-hellman-group-exchange-sha1|diffie-hellman-group14-sha1|diffie-hellman-group1-sha1' {{ sshd_config }}
+      register: SSHA1_check
+
+    - name: Remove SSA1 key algoruthm
+      shell: sed -i -e "s/diffie-hellman-group-exchange-sha1,//g" -e "s/diffie-hellman-group14-sha1,//g" -e "s/diffie-hellman-group1-sha1,//g" {{ sshd_config }}
+      when: SSHA1_check.rc == 0 
+      register: SSHA1
+
+    - name: restart sshd service
+      ansible.builtin.service:
+       name: sshd
+       state: restarted
+      when: SSHA1.rc == 0

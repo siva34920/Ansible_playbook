@@ -1,0 +1,11 @@
+---
+- name: upgrade qualycs
+  hosts: all
+  tasks:
+    - name: Copy the rpm to the server
+      copy:
+        src: /root/mysql80-community-release-el6-1.noarch.rpm
+        dest: /tmp
+
+    - name: install the rpm
+      shell: rpm -ivh /tmp/mysql80-community-release-el6-1.noarch.rpm
