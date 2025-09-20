@@ -1,6 +1,6 @@
 
 - name: create the directory Sivabalan on all servers.
-  hosts: "{{ hostname }}"
+  hosts: all
   tasks:
     - name: create a directory
       file:
