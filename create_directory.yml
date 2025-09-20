@@ -1,5 +1,5 @@
 - name: Add survey host dynamically
-  hosts: localhost
+  hosts: all
   gather_facts: false
   tasks:
     - add_host:
