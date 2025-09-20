@@ -1,8 +1,15 @@
-
-- name: create the directory Sivabalan on all servers.
-  hosts: "{{ limit_host }}"
+- name: Add survey host dynamically
+  hosts: localhost
+  gather_facts: false
   tasks:
-    - name: create a directory
-      file:
-       path: /etc/siva
-       state: directory
+    - add_host:
+        name: "{{ target_host }}"
+        groups: dynamic
+
+- name: Run tasks on dynamic host
+  hosts: dynamic
+  become: true
+  tasks:
+    - file:
+        path: /etc/siva
+        state: directory
