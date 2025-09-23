@@ -7,5 +7,5 @@
       when: target_playbook == "rpc"
 
     - name: Include SSHD playbook
-      import_playbook: sshd.yml
-      when: target_playbook == "sshd"
+      import_playbook: Find_world-writable_files_and_set_sticky_bit.yml
+      when: target_playbook == "WWF"
