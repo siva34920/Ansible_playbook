@@ -1,0 +1,11 @@
+- name: Dispatcher Playbook
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Include RPC playbook
+      import_playbook: rpc.yml
+      when: target_playbook == "rpc"
+
+    - name: Include SSHD playbook
+      import_playbook: sshd.yml
+      when: target_playbook == "sshd"
