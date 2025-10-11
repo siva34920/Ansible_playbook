@@ -1,15 +1,18 @@
-- name: Build dynamic inventory and include only the chosen playbook
+---
+- name: Build dynamic inventory for ad-hoc execution
   hosts: localhost
   gather_facts: no
   tasks:
-    - name: Include the selected task file
-      include_tasks: "{{ target_playbook }}.yml"
+    - name: Add the target host to dynamic_targets
+      add_host:
+        name: "{{ target_host }}"
+        groups: dynamic_targets
       run_once: true
 
-- name: Execute tasks on {{ target_host }}
+- name: Execute only the chosen tasks on {{ target_host }}
   hosts: dynamic_targets
   become: true
   gather_facts: no
   tasks:
-    - name: Run selected tasks
-      import_tasks: "{{ target_playbook }}.yml"
+    - name: Include and run {{ target_playbook }}.yml
+      include_tasks: "{{ target_playbook }}.yml"
