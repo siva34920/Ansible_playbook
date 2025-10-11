@@ -1,8 +1,8 @@
 ---
 - name: Ensure rpcbind is restarted if NFS4 is mounted
-  hosts: all
-  become: yes
-  tasks:
+#  hosts: all
+#  become: yes
+#  tasks:
     - name: Collect the existing mountpoint of the server
       shell: df -T | grep nfs
       register: nfs_out
@@ -24,7 +24,6 @@
         msg: "NFS3 mount detected. No action needed."
       when: "'vers=3' in mount_info.stdout"
 
-  handlers:
     - name: stop_rpc_related_services
       service:
         name: "{{ item }}"

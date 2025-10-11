@@ -1,16 +1,18 @@
 ---
 - name: Build Dynamic inventory for executing Ad-hoc playbook
-  hosts: localhosts
+  hosts: localhost
   gather_facts: no
   tasks:
     - name: Add the target hosts
       add_host:
         name: "{{ target_host }}"
         groups: dynamic_targets
+      run_once: true
 
 - name: Executing the playbook on {{ target_host }}
   hosts: dynamic_targets
   become: true
+  gather_facts: no
   tasks:
    - name: RPC playbook
      include_tasks: rpc.yml
@@ -19,3 +21,7 @@
    - name: checking uptime
      include_tasks: check_uptime.yml
      when: target_playbook == "uptime"
+
+   - name: creating the directory
+     include_tasks: create_directory.yml
+     when: target_playbook == 'create_dir'

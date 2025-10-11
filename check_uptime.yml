@@ -1,7 +1,4 @@
 ---
-- name: check the uptime of the server
-  hosts: all
-  tasks:
     - name: uptime command
       shell: 'uptime'
       register: uptime_out
