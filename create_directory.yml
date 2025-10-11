@@ -1,5 +1,4 @@
 - name: create a directory
-  become: true
   file:
      path: /etc/siva
      state: directory
