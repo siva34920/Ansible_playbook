@@ -16,6 +16,6 @@
      include_tasks: rpc.yml
      when: target_playbook == "rpc"
 
-   - name: checking uptime for the {{ target_host }}
+   - name: checking uptime
      include_tasks: check_uptime.yml
      when: target_playbook == "uptime"
