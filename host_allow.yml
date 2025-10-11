@@ -1,0 +1,17 @@
+---
+- name: Add entry to /etc/hosts.allow
+  hosts: all
+  become: true
+  vars:
+    hosts_allow_entry: "sshd : 192.168.1.100"
+
+  tasks:
+    - name: Ensure entry exists in /etc/hosts.allow
+      lineinfile:
+        path: /etc/hosts.allow
+        line: "{{ hosts_allow_entry }}"
+        state: present
+        create: yes
+        backup: yes
+        insertafter: EOF
+      tags: hosts_allow

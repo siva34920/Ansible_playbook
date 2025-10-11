@@ -1,0 +1,21 @@
+---
+- name: Build Dynamic inventory for executing Ad-hoc playbook
+  hosts: localhosts
+  gather_facts: no
+  tasks:
+    - name: Add the target hosts
+      add_host:
+        name: "{{ target_host }}"
+        groups: dynamic_targets
+
+- name: Executing the playbook on {{ target_host }}
+  hosts: target_host
+  become: true
+  tasks:
+   - name: RPC playbook
+     include_tasks: rpc.yml
+     when: target_playbook == "rpc"
+
+   - name: checking uptime for the {{ target_host }}
+     include_tasks: check_uptime.yml
+     when: target_playbook == "uptime"

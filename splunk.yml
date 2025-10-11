@@ -1,0 +1,41 @@
+---
+hosts: all
+become_user: root
+become: true
+Task:
+  - name: copy the splunk file to the hosts /tmp
+    copy:
+      src: /var/opt/splunk.tar.gz
+      dest: /tmp
+    register: copy.out
+
+   - name: Run Splunk path detection and untar
+  command: sh find_splunk_file.sh
+  register: unarchieve_out
+  changed_when: "'Untarring' in unarchieve_out.stdout"
+  failed_when: unarchieve_out.rc != 0
+
+- name: Read recorded Splunk path
+  slurp:
+    src: /tmp/splunk_path.txt
+  register: splunk_path_raw
+
+- name: Set Splunk path fact
+  set_fact:
+    splunk_path: "{{ splunk_path_raw.content | b64decode | trim }}"
+
+- name: Debug Splunk path
+  debug:
+    msg: "Splunk is installed at {{ splunk_path }}"
+
+   - name: check and stop the splunk service
+    Service:
+      name: splunk
+      status: stop
+    when: unarchieve.out == 0
+
+  - name: Accept the licence for the splunk
+    shell: cd { splunk_path };./splunkforwarder/bin/splunk start --accept-licence --answer-yes
+
+    
+
