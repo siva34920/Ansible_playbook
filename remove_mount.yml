@@ -1,0 +1,18 @@
+---
+- name: Check and remove {{ mount_point }} mount point
+  hosts: all
+  become: true
+  tasks:
+    - name: "Remove {{ mount_point }} entry from /etc/fstab"
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^\s*[^#].*[\s\t]{{ mount_point }}(\s|$)'
+        state: absent
+        backup: yes
+      register: fstab_changed
+
+    - name: "Unmount {{ mount_point }}"
+      ansible.posix.mount:
+        path: "{{ mount_point }}"
+        state: unmounted
+      when: fstab_changed.changed
